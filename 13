@@ -1,0 +1,3 @@
+class MemoryGameApp(App):
+    def build(self):
+        return MemoryGame()
