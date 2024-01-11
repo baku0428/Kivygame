@@ -1,0 +1,8 @@
+    def show_game_result(self):
+        result = "You Win!" if self.score == self.max_score else "Game Over!"
+        self.score_label.text = f"{result} Final Score: {self.score}/{self.max_score}"
+        for button in self.buttons:
+            button.disabled = True
+
+        Clock.unschedule(self.update_timer)
+        self.remaining_time_label.text = "Time: 0s"
