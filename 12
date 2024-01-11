@@ -1,0 +1,2 @@
+    def exit_game(self, button):
+        App.get_running_app().stop()
