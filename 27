@@ -1,0 +1,73 @@
+    def check_match(self, dt):
+        if self.cards[self.first_card_index] == self.cards[self.second_card_index]:
+            self.score += 1
+        else:
+            self.remaining_attempts -= 1
+            self.update_attempts_label()
+            
+            if self.remaining_attempts == 0:
+                self.show_game_result()
+                return
+
+            self.exposed[self.first_card_index] = False
+            self.exposed[self.second_card_index] = False
+            self.buttons[self.first_card_index].text = " "
+            self.buttons[self.second_card_index].text = " "
+
+        self.first_card_index = None
+        self.second_card_index = None
+
+        self.update_score_label()
+
+        if self.score == self.max_score or self.remaining_time == 0:
+            self.show_game_result()
+
+    def stop_game(self, button):
+        Clock.unschedule(self.update_timer)
+        self.remaining_time_label.text = "Time: 0s"
+        self.show_game_result()
+
+    def update_score_label(self):
+        self.score_label.text = f"Score: {self.score}/{self.max_score}"
+
+    def update_attempts_label(self):
+        self.remaining_attempts_label.text = f"Attempts: {self.remaining_attempts}/{self.max_attempts}"
+
+    def update_timer(self, dt):
+        self.remaining_time -= 1
+        self.remaining_time_label.text = f"Time: {self.remaining_time}s"
+
+        if self.remaining_time == 0 or self.remaining_attempts == 0:
+            self.show_game_result()
+
+    def show_game_result(self):
+        result = "You Win!" if self.score == self.max_score else "Game Over!"
+        self.score_label.text = f"{result} Final Score: {self.score}/{self.max_score}"
+        for button in self.buttons:
+            button.disabled = True
+
+        Clock.unschedule(self.update_timer)
+        self.remaining_time_label.text = "Time: 0s"
+
+    def reset_game(self, button):
+        Clock.unschedule(self.update_timer)
+        self.remaining_time_label.text = f"Time: {self.time_limit}s"
+    
+        self.cards = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R'] * 2
+        shuffle(self.cards)
+        self.exposed = [False] * len(self.cards)
+        self.first_card_index = None
+        self.second_card_index = None
+        self.score = 0
+        self.remaining_attempts = self.max_attempts
+        self.reset_button.disabled = False
+
+        for i, button in enumerate(self.buttons):
+            button.text = " "
+            button.disabled = False
+            self.exposed[i] = False
+
+        self.update_score_label()
+        self.update_attempts_label()
+        self.remaining_time = self.time_limit
+        Clock.schedule_interval(self.update_timer, 1)
