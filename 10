@@ -1,0 +1,22 @@
+    def reset_game(self, button):
+        Clock.unschedule(self.update_timer)
+        self.remaining_time_label.text = f"Time: {self.time_limit}s"
+    
+        self.cards = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R'] * 2
+        shuffle(self.cards)
+        self.exposed = [False] * len(self.cards)
+        self.first_card_index = None
+        self.second_card_index = None
+        self.score = 0
+        self.remaining_attempts = self.max_attempts
+        self.reset_button.disabled = False
+
+        for i, button in enumerate(self.buttons):
+            button.text = " "
+            button.disabled = False
+            self.exposed[i] = False
+
+        self.update_score_label()
+        self.update_attempts_label()
+        self.remaining_time = self.time_limit
+        Clock.schedule_interval(self.update_timer, 1)
