@@ -1,0 +1,6 @@
+    def pause_game(self, button):
+        Clock.unschedule(self.update_timer)
+
+        content = Label(text="Game Paused", font_size=20)
+        popup = Popup(title="Pause", content=content, size_hint=(None, None), size=(200, 100))
+        popup.open()
