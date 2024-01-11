@@ -1,0 +1,137 @@
+class MemoryGame(GridLayout):
+    def __init__(self, **kwargs):
+        super(MemoryGame, self).__init__(**kwargs)
+        self.cols = 6
+        self.cards = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R'] * 2
+        shuffle(self.cards)
+        self.exposed = [False] * len(self.cards)
+        self.first_card_index = None
+        self.second_card_index = None
+        self.score = 0
+        self.max_score = len(self.cards) // 2
+        self.max_attempts = 25
+        self.remaining_attempts = self.max_attempts
+        self.time_limit = 100
+        self.remaining_time = self.time_limit
+        self.pause_button = Button(text="Pause", on_press=self.pause_game, size_hint_y=None, height=44)
+        self.stop_button = Button(text="Stop", on_press=self.stop_game, size_hint_y=None, height=44)
+
+        self.buttons = [Button(text=" ", on_press=self.card_pressed) for _ in self.cards]
+        for button in self.buttons:
+            self.add_widget(button)
+
+        self.score_label = Label(text=f"Score: {self.score}/{self.max_score}", size_hint_y=None, height=44)
+        self.remaining_attempts_label = Label(text=f"Attempts: {self.remaining_attempts}/{self.max_attempts}", size_hint_y=None, height=44)
+        self.remaining_time_label = Label(text=f"Time: {self.remaining_time}s", size_hint_y=None, height=44)
+        self.exit_button = Button(text="Exit", on_press=self.exit_game, size_hint_y=None, height=44)
+        self.reset_button = Button(text="Reset", on_press=self.reset_game, size_hint_y=None, height=44)
+
+        self.add_widget(self.score_label)
+        self.add_widget(self.remaining_attempts_label)
+        self.add_widget(self.remaining_time_label)
+        self.add_widget(self.exit_button)
+        self.add_widget(self.reset_button)
+        self.add_widget(self.pause_button)
+        self.add_widget(self.stop_button)
+
+        Clock.schedule_interval(self.update_timer, 1)
+
+    def card_pressed(self, button):
+        index = self.buttons.index(button)
+        if not self.exposed[index]:
+            button.text = self.cards[index]
+            self.exposed[index] = True
+
+            if self.first_card_index is None:
+                self.first_card_index = index
+            else:
+                self.second_card_index = index
+                Clock.schedule_once(self.check_match, 1)
+
+    def check_match(self, dt):
+        if self.cards[self.first_card_index] == self.cards[self.second_card_index]:
+            self.score += 1
+        else:
+            self.remaining_attempts -= 1
+            self.update_attempts_label()
+            
+            if self.remaining_attempts == 0:
+                self.show_game_result()
+                return
+
+            self.exposed[self.first_card_index] = False
+            self.exposed[self.second_card_index] = False
+            self.buttons[self.first_card_index].text = " "
+            self.buttons[self.second_card_index].text = " "
+
+        self.first_card_index = None
+        self.second_card_index = None
+
+        self.update_score_label()
+
+        if self.score == self.max_score or self.remaining_time == 0:
+            self.show_game_result()
+
+    def stop_game(self, button):
+        Clock.unschedule(self.update_timer)
+        self.remaining_time_label.text = "Time: 0s"
+        self.show_game_result()
+
+    def update_score_label(self):
+        self.score_label.text = f"Score: {self.score}/{self.max_score}"
+
+    def update_attempts_label(self):
+        self.remaining_attempts_label.text = f"Attempts: {self.remaining_attempts}/{self.max_attempts}"
+
+    def update_timer(self, dt):
+        self.remaining_time -= 1
+        self.remaining_time_label.text = f"Time: {self.remaining_time}s"
+
+        if self.remaining_time == 0 or self.remaining_attempts == 0:
+            self.show_game_result()
+
+    def show_game_result(self):
+        result = "You Win!" if self.score == self.max_score else "Game Over!"
+        self.score_label.text = f"{result} Final Score: {self.score}/{self.max_score}"
+        for button in self.buttons:
+            button.disabled = True
+
+        Clock.unschedule(self.update_timer)
+        self.remaining_time_label.text = "Time: 0s"
+
+    def reset_game(self, button):
+        Clock.unschedule(self.update_timer)
+        self.remaining_time_label.text = f"Time: {self.time_limit}s"
+    
+        self.cards = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R'] * 2
+        shuffle(self.cards)
+        self.exposed = [False] * len(self.cards)
+        self.first_card_index = None
+        self.second_card_index = None
+        self.score = 0
+        self.remaining_attempts = self.max_attempts
+        self.reset_button.disabled = False
+
+        for i, button in enumerate(self.buttons):
+            button.text = " "
+            button.disabled = False
+            self.exposed[i] = False
+
+        self.update_score_label()
+        self.update_attempts_label()
+        self.remaining_time = self.time_limit
+        Clock.schedule_interval(self.update_timer, 1)
+
+    def pause_game(self, button):
+        Clock.unschedule(self.update_timer)
+
+        content = Label(text="Game Paused", font_size=20)
+        popup = Popup(title="Pause", content=content, size_hint=(None, None), size=(200, 100))
+        popup.open()
+
+    def exit_game(self, button):
+        App.get_running_app().stop()
+
+class MemoryGameApp(App):
+    def build(self):
+        return MemoryGame()
