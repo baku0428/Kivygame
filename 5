@@ -1,0 +1,4 @@
+    def stop_game(self, button):
+        Clock.unschedule(self.update_timer)
+        self.remaining_time_label.text = "Time: 0s"
+        self.show_game_result()
