@@ -1,0 +1,11 @@
+    def card_pressed(self, button):
+        index = self.buttons.index(button)
+        if not self.exposed[index]:
+            button.text = self.cards[index]
+            self.exposed[index] = True
+
+            if self.first_card_index is None:
+                self.first_card_index = index
+            else:
+                self.second_card_index = index
+                Clock.schedule_once(self.check_match, 1)
