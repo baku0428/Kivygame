@@ -1,0 +1,23 @@
+    def check_match(self, dt):
+        if self.cards[self.first_card_index] == self.cards[self.second_card_index]:
+            self.score += 1
+        else:
+            self.remaining_attempts -= 1
+            self.update_attempts_label()
+            
+            if self.remaining_attempts == 0:
+                self.show_game_result()
+                return
+
+            self.exposed[self.first_card_index] = False
+            self.exposed[self.second_card_index] = False
+            self.buttons[self.first_card_index].text = " "
+            self.buttons[self.second_card_index].text = " "
+
+        self.first_card_index = None
+        self.second_card_index = None
+
+        self.update_score_label()
+
+        if self.score == self.max_score or self.remaining_time == 0:
+            self.show_game_result()
