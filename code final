@@ -17,9 +17,9 @@ class MemoryGame(GridLayout):
         self.second_card_index = None
         self.score = 0
         self.max_score = len(self.cards) // 2
-        self.max_attempts = 30
+        self.max_attempts = 50
         self.remaining_attempts = self.max_attempts
-        self.time_limit = 100
+        self.time_limit = 180
         self.remaining_time = self.time_limit
         self.pause_button = Button(text="Pause", on_press=self.pause_game, size_hint_y=None, height=44)
         self.stop_button = Button(text="Stop", on_press=self.stop_game, size_hint_y=None, height=44)
@@ -56,13 +56,18 @@ class MemoryGame(GridLayout):
                 self.second_card_index = index
                 Clock.schedule_once(self.check_match, 1)
 
+                # ปิดปุ่มทุกราวที่ไม่ได้แสดงคู่
+                for i, btn in enumerate(self.buttons):
+                    if not self.exposed[i]:
+                        btn.disabled = True
+
     def check_match(self, dt):
         if self.cards[self.first_card_index] == self.cards[self.second_card_index]:
             self.score += 1
         else:
             self.remaining_attempts -= 1
             self.update_attempts_label()
-            
+
             if self.remaining_attempts == 0:
                 self.show_game_result()
                 return
@@ -79,6 +84,10 @@ class MemoryGame(GridLayout):
 
         if self.score == self.max_score or self.remaining_time == 0:
             self.show_game_result()
+
+        for i, btn in enumerate(self.buttons):
+            if not self.exposed[i]:
+                btn.disabled = False
 
     def stop_game(self, button):
         Clock.unschedule(self.update_timer)
